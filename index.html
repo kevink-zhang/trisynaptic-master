@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Trisynaptic - Build a brain</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <style>
+      body {
+        font-family: Inter, sans-serif;
+        font-size: 15px;
+        margin: 0;
+        padding: 0;
+      }
+      h1 {
+        font-weight: normal;
+        font-size: 1.5em;
+      }
+      #c {
+        float: left;
+      }
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding-top: 100px;
+        background: rgba(0, 0, 0, 0.25);
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+      }
+      .modal-body {
+        background-color: #fefefe;
+        position: relative;
+        margin: auto;
+        padding: 20px;
+        border-radius: 20px;
+        max-width: 900px;
+      }
+      .close {
+        color: #aaaaaa;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: #000;
+      }
+      #help {
+        border-radius: 100%;
+        width: 36px;
+        height: 36px;
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #2c2c2c;
+        color: white;
+        text-align: center;
+        line-height: 36px;
+        cursor: pointer;
+      }
+      .toolbar {
+        height: 40px;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #2c2c2c;
+      }
+      .toolbar a {
+        display: block;
+        float: left;
+        padding: 10px 10px;
+        font-size: 15px;
+        line-height: 20px;
+      }
+      .toolbar a:hover {
+        background: #000;
+        color: white;
+      }
+      .toolbar a.selected {
+        background: #18a0fb;
+        color: white;
+      }
+      #sidebar {
+        float: right;
+        width: 224px;
+        height: calc(100vh - 56px);
+        padding: 8px;
+      }
+      hr {
+        height: 1px;
+        border: none;
+        background: #e5e5e5;
+      }
+      code {
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(27, 31, 35, 0.05);
+        border-radius: 3px;
+        font-family: Consolas, monospace;
+      }
+      input {
+        outline: none;
+        border: 1px solid white;
+        padding: 4px;
+        margin: 1px;
+        width: 40px;
+      }
+      input:hover {
+        border: 1px solid #e5e5e5;
+      }
+      input:focus {
+        border: 2px solid #18a0fb;
+        margin: 0px;
+      }
+      .neuron #synapse {
+        display: none;
+      }
+      .synapse #neuron {
+        display: none;
+      }
+    </style>
+
+    <script src="/script.js" defer></script>
+  </head>
+  <body>
+    <div class="modal">
+      <div class="modal-body">
+        <span class="close">&times;</span>
+        <h1>Trisynaptic</h1>
+        <p>
+          The blue circles are excitatory neurons. The red circles are
+          inhibitory neurons. <br />
+          Click on a neuron to view its config in the sidepanel on the right.
+          <br />
+          Enable <code>Graphed</code> in the sidepanel to view the neuron's
+          voltage (membrane potential).<br />
+          Click on an edge to view its config in the right sidepanel. <br />
+          Connect two neurons by holding down the alt key and dragging between
+          the two neurons. <br />
+          Finally, right click a neuron to activate that neuron and simulate the
+          brain!
+
+          <br /><br />
+          This simulation builds on previous work on leaky integrate and fire
+          (GLIF) neurons from
+          <a href="https://www.nature.com/articles/s41467-017-02717-4"
+            >this paper</a
+          >
+          by the Allen Brain Institute and
+          <a href="https://www.eneuro.org/content/4/2/ENEURO.0022-17.2017"
+            >this paper</a
+          >
+          by Neuronify.
+        </p>
+        <iframe src="https://drive.google.com/file/d/1LzV0ztmvrVu1SyJLlpgvfJMQ927Wy7li/preview" width="640" height="480"></iframe>
+        <p>
+          <code>click</code> to create a new neuron<br />
+          <code>shift+click</code> to create an inhibitory neuron<br />
+          <code>alt+drag</code> to start a new connection<br />
+          <code>delete</code> to delete the current neuron<br />
+          <code>esc</code> to deselect<br />
+          <code>right click</code> to excite a neuron <br />
+          <code>cmd+c</code> to copy your graph <br />
+          <code>cmd+v</code> to paste a copied graph <br />
+          <code>arrow keys</code> to move the camera arround <br />
+          <code>r</code> to reset the camera position <br />
+        </p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <a class="selected">🔵</a>
+      <a>🔴</a>
+    </div>
+
+    <canvas id="c" tabindex="1"></canvas>
+
+    <div id="sidebar" class="neuron">
+      <div id="neuron">
+        <h1>Neuron Info</h1>
+        <label>
+          Threshold:
+          <input id="threshold" value="1" type="number" min="1" max="10" />
+        </label>
+        <br />
+        <label>
+          Graphed:
+          <input type="checkbox" id="graph-toggle" />
+        </label>
+      </div>
+      <div id="synapse">
+        <h1>Synapse Info</h1>
+        <label>
+          Strength
+          <input id="strength" value="1" type="number" />
+        </label>
+      </div>
+    </div>
+
+    <div id="help">?</div>
+  </body>
+</html>

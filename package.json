@@ -1,0 +1,23 @@
+{
+  "name": "trisynaptic",
+  "version": "0.0.1",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "start": "node build.js",
+    "build": "esbuild script.js --outfile=dist/script.js --minify --bundle && cp index.html dist",
+    "format": "prettier --write *.{js,html}",
+    "lint": "eslint script.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^3.4.0",
+    "esbuild": "^0.4.3",
+    "prettier": "^2.0.5",
+    "servor": "^4.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.1.0"
+  }
+}
